@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  fdroid:
+    build:
+      context: ./fdroid
+    depends_on:
+      android-sdk:
+        condition: service_healthy
+    volumes:
+      - ./fdroid/repo:/fdroid/repo
+      - shared-data:/opt/android-sdk
+      - /usr/share/nginx/html/fdroid/config.yml:/fdroid/config.yml
+    environment:
+      - ANDROID_HOME=/opt/android-sdk
+    healthcheck:
+      test: ["CMD", "test", "-f", "/fdroid/repo/index-v1.jar"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    container_name: fdroid-server
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      fdroid:
+        condition: service_healthy
+    volumes:
+      - /home/piotr-piotr/Desktop/fdroid_repo/nginx/nginx.config:/etc/nginx/nginx.conf
+      - ./fdroid/repo:/usr/share/nginx/html/fdroid:ro
+      - /usr/share/nginx/html/fdroid/repo:/usr/share/nginx/html/fdroid/repo:ro
+      - /usr/share/nginx/html/fdroid/config.yml:/usr/share/nginx/html/fdroid/config.yml:ro
+    ports:
+      - "8080:80"
+    container_name: fdroid-nginx
+
+  android-sdk:
+    image: thyrlian/android-sdk
+    container_name: android-sdk
+    volumes:
+      - shared-data:/opt/android-sdk
+      - ./android-init.sh:/android-init.sh
+    environment:
+      - ANDROID_HOME=/opt/android-sdk
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+    command: ["/bin/bash", "/android-init.sh"]
+    tty: true
+    healthcheck:
+      test: ["CMD", "test", "-f", "/opt/android-sdk/platform-tools/adb"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  shared-data:
