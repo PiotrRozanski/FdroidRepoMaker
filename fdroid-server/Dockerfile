@@ -12,11 +12,11 @@ RUN apt-get update && \
 
 ENV PATH="/opt/fdroid-venv/bin:$PATH"
 
-WORKDIR /fdroid/repo
+WORKDIR /fdroid-server
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-VOLUME ["/fdroid/repo"]
+VOLUME ["/fdroid"]
 
 ENTRYPOINT ["/entrypoint.sh"]
