@@ -2,12 +2,12 @@ version: '3.8'
 services:
   fdroid:
     build:
-      context: ./fdroid
+      context: ./fdroid-server
     depends_on:
       android-sdk:
         condition: service_healthy
     volumes:
-      - ./fdroid:/fdroid
+      - ./fdroid-server/fdroid:/fdroid
       - shared-data:/opt/android-sdk
     environment:
       - ANDROID_HOME=/opt/android-sdk
@@ -22,7 +22,7 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx/nginx.config:/etc/nginx/nginx.conf
-      - ./fdroid:/usr/share/nginx/html/fdroid
+      - ./fdroid-server/fdroid:/usr/share/nginx/html/fdroid
     ports:
       - "8080:80"
     healthcheck:
